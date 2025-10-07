@@ -8,6 +8,7 @@ def load_data(file_path: str) -> pd.DataFrame:
     df = pd.read_csv(file_path, sep=';', parse_dates=[[0, 1]], 
                      infer_datetime_format=True, na_values=['?'])
     df.rename(columns={'Date_Time': 'datetime'}, inplace=True)
+    df["datetime"] = pd.to_datetime(df["datetime"], format="%d/%m/%Y %H:%M:%S")
     df.set_index('datetime', inplace=True)
     return df
 
@@ -22,7 +23,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
     # Fill missing values (forward fill)
-    df.fillna(method='ffill', inplace=True)
+    df.ffill(inplace=True)
 
     return df
 
@@ -43,6 +44,8 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
     df['Power_factor'] = df['Power_factor'].clip(0, 1)  # PF should be <= 1
 
     # Time-based features
+    
+    #pd.to_datetime(df.index)
     df['month'] = df.index.month
     df['hour'] = df.index.hour
     df['day_of_week'] = df.index.dayofweek  # Monday=0, Sunday=6
@@ -79,4 +82,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     df = preprocess(args.data)
     df.to_csv(DATA_PATH)
+    print("Data processed successfully.")
     print(df.head())
