@@ -103,7 +103,7 @@ def predict(req: PredictRequest):
 
 
 # =======================
-# 7️⃣ SHAP setup
+# 7- SHAP setup
 # =======================
 import shap
 

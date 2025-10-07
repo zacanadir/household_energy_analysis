@@ -56,7 +56,7 @@ def main(args):
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    parser.add_argument("--endpoint", default="predict", help="choose 'predict', 'explain', or 'both'")
+    parser.add_argument("--endpoint","-e", default="predict", help="choose 'predict', 'explain', or 'both'")
     args = parser.parse_args()
     main(args)
 
