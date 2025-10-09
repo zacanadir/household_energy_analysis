@@ -1,74 +1,54 @@
 Household Power Prediction — End-to-End ML Pipeline
-
-Overview
-
-This project predicts household global reactive power based on smart meter data. The system is adaptive, explainable, and production-ready, including:
-Feature engineering & time-lag analysis
-Neural network modeling with PyTorch Lightning
-FastAPI prediction + explainability endpoints
-Drift detection & automated retraining via Airflow
-
-Architecture
-Raw Household Data
-       │
-       ▼
-Notebook FE → power_features.csv
-       │
-       ▼
-Initial Training → best_model.pt + scaler.pkl
-       │
-       ▼
-FastAPI API ──> Receives requests/features
-       │
-       ▼
-Predictions + Logs → pred_requests.csv
-       │
-       ▼
-Airflow DAG
-   ├─ Drift Detection
-   │     └─ if drift → retrain_model()
-   └─ Retraining → Updated model/scaler
-       │
-       ▼
-FastAPI reloads or uses new model
-       │
-       ▼
-New Predictions (cycle continues)
-
-Highlights:
-✅ Adaptive retraining: Model updates automatically when feature drift is detected.
-✅ Explainable predictions: SHAP or integrated gradients via /explain endpoint.
-✅ Monitoring: Logs every prediction request for auditing and drift detection.
-✅ Scalable: Supports multi-GPU training and growing datasets.
-
-Features & Workflow
-Data Processing
-Parse date/time, add temporal features (hour, day-of-week, weekend).
-Compute lag features for power, submetering, intensity.
-Scale features and save power_features.csv.
-Modeling
-Train a neural network (MLP) using PyTorch Lightning.
-Save best model + scaler to artifacts_lightning/.
-API Deployment
+Predict household global reactive power using smart meter data with a production-ready, adaptive ML system.
+Tech Stack & Tools
+Python | PyTorch Lightning | FastAPI + Uvicorn
+Pandas / NumPy for data processing
+SHAP / Integrated Gradients for explainability
+Airflow for drift detection & automated retraining
+Joblib for scaler persistence
+Problem & Motivation
+Short-term prediction of reactive power helps households and utilities optimize energy consumption and detect anomalies. This project demonstrates full ML engineering skills: feature engineering, model training, explainability, deployment, monitoring, and adaptive retraining.
+Solution Overview
+Data Processing & Feature Engineering
+Parse timestamps, add temporal features (hour, day-of-week, weekend).
+Compute lag features for power, sub-metering, and intensity.
+Scale features and save to power_features.csv.
+Model Training
+Neural network (MLP) trained with PyTorch Lightning.
+Best model and scaler persisted to artifacts_lightning/.
+API Deployment with FastAPI
 /predict: returns predicted reactive power.
-/explain: returns feature contributions via SHAP.
-Logs every request to pred_requests.csv.
-Drift Detection & Retraining
-Airflow DAG runs periodically:
-Checks recent predictions for distribution drift.
-If drift detected, combines new data + original training set.
-Retrains the model automatically and updates the API.
-
+/explain: returns feature contributions using SHAP.
+Logs every request for auditing and drift monitoring.
+Drift Detection & Automated Retraining
+Airflow DAG checks for distribution drift in incoming prediction data.
+If drift detected, retrains model using new + original data.
+Updates API automatically with new model/scaler for continuous deployment.
+Project Structure
+household_power_pipeline/
+data/
+power_features.csv
+src/
+train_lightning.py
+api/
+app.py
+artifacts_lightning/
+best_model.pt
+scaler.pkl
+dags/
+drift_retrain_dag.py
+README.md
 Quick Start
-# 1. Install dependencies
+Install dependencies
 pip install -r requirements.txt
-
-# 2. Train initial model
-python train_lightning.py --data-path data/processed/power_features.csv
-
-# 3. Launch API
+Train initial model
+python src/train_lightning.py --data-path data/power_features.csv
+Launch API
 uvicorn src.api.app:app --reload --port 8000
-
-# 4. Schedule Airflow DAG for drift detection & retraining
+Schedule Airflow DAG for drift detection & retraining
 airflow dags trigger power_model_drift_retrain
-
+Highlights & Results
+Adaptive retraining: model updates automatically on feature drift
+Explainable predictions via SHAP / integrated gradients
+Logging and monitoring of every prediction request
+Scalable training and inference with PyTorch Lightning
